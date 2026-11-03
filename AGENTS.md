@@ -1,31 +1,26 @@
 # Agent Instructions
 
-## Required Rules Reading
+## Startup and synchronization
 
-- Each primary, delegated, or spawned agent must read `RULES.md` in full once when it starts a new session or run in this workspace.
-- Do not reread `RULES.md` for every prompt or task within the same session or run.
-- If an agent edits `RULES.md` during its session, or is explicitly told that it changed since it was last read, the agent must reread the updated file before continuing work.
+- Workspace-root `AGENTS.md` and `RULES.md` are symlinks into this `agent-rules` repository. Never replace them with regular files.
+- After this bootstrap file is loaded, the primary agent should try `git -C agent-rules pull --ff-only` before task work only when the rules worktree is clean. If the pull advances the repository, reread both policy files before continuing. If the repository is dirty, offline, or cannot fast-forward, continue with the local copy, report the condition, and never stash, reset, discard, or auto-resolve another session's work.
+- Only the primary agent synchronizes `agent-rules`. Local subagents use the existing checkout; fresh external reviewers receive only the review scope and repository/ref and must not modify the workspace or commission further reviewers.
+- Read `RULES.md` once after the synchronization attempt. Reread it only after editing it or when explicitly told it changed.
 
-## Knowledge Base Usage
+## Knowledge base
 
-- Read `knowledge-base/` only when the task requires architecture or project facts. Do not read it for unrelated tasks.
-- When the knowledge base is needed, use `knowledge-base/README.md` to select and read only the documents relevant to the task. Read the entire knowledge base only when the task genuinely requires workspace-wide architecture or project context.
-- After completing each material change, update the relevant documents in `knowledge-base/` when the change affects architecture, externally visible behavior, operational procedures, constraints, or important project decisions. Do not document routine implementation details already evident from the code.
-- Before committing, verify that `knowledge-base/` accurately reflects the changes being committed and update it if necessary.
+- Read `knowledge-base/` only when a task needs architecture or project facts. Start with `knowledge-base/README.md` and open only the relevant documents.
+- When an intended change affects documented architecture, behavior, operations, constraints, or decisions, update the relevant documentation according to `knowledge-base/MAINTENANCE.md` and distinguish current behavior from proposed or unmerged behavior.
 
-## Dynamic Rules Maintenance
+## Delegation and resources
 
-- Treat `RULES.md` as a living set of feedback-driven rules that may change during the work.
-- When the user explicitly says that an agent did a great job, add a good-practice rule only when the feedback or task history clearly identifies a reusable process or behavior. If the reason for the praise is unclear, ask what should be preserved before adding a rule.
-- When the user says that an agent acted incorrectly, worked in an unintended way, or did a bad job, first determine whether the feedback already states the exact reason clearly enough to produce an unambiguous corrective rule.
-- If the exact reason is crystal clear from the user's initial feedback, add the corrective rule without asking a redundant follow-up question. Otherwise, ask the user exactly what was wrong and do not guess or add a rule before receiving clarification.
-- Once the exact problem is clear, add a concise, actionable rule to `RULES.md` describing what to avoid or what not to do.
-- Generalize feedback into reusable guidance instead of recording task-specific details.
-- Preserve existing rules and consolidate overlapping guidance instead of adding duplicates or contradictions.
-- `AGENTS.md` and `RULES.md` in the workspace root are symlinks into `agent-rules/`, a clone of https://github.com/vladvic/agent-rules. Before reading them at the start of a session, run `git -C agent-rules pull --ff-only`. After editing either file, commit the change in `agent-rules/` and push it to `main`; if the push is rejected, pull with rebase, resolve, and push again. Never replace the symlinks with regular files.
+- Delegate only independent, bounded work with a clear result. Keep short or dependent steps with the primary agent, prevent overlapping file edits, and verify delegated results before relying on them.
+- For local CPU-intensive work, do not stack heavy jobs and cap total build or test workers at half the available logical CPUs unless the host enforces a stricter quota. Do not add affinity ceremony to lightweight commands.
 
-## Subagent Delegation
+## Maintaining these rules
 
-- Use subagents for independent, clearly bounded subtasks that can run in parallel and have a clear expected result, when the expected benefit outweighs the coordination overhead.
-- Keep short tasks and dependent steps with the primary agent. Do not delegate solely because a task requires understanding existing code, adding a feature, or fixing a bug.
-- Do not assign overlapping edits to the same files without explicit coordination. The primary agent remains responsible for integrating and verifying delegated work.
+- Only the primary agent edits these policy files. Add or change a rule when explicit user feedback identifies a clear, reusable problem; ask when the intended lesson is ambiguous.
+- Before adding a rule, require that it is likely to recur, applies workspace-wide, is actionable, and is not already covered. Put repository-specific procedures in that repository's instructions or CI, workspace facts in the knowledge base, and mechanically checkable constraints in automation.
+- Keep `RULES.md` at no more than 15 bullets. Adding a rule requires consolidating or retiring an existing rule when necessary; superseded rules may be removed.
+- After editing a policy file, reread the resulting file and tell the user what changed.
+- Direct commits to `agent-rules/main` are the explicit exception to the normal no-direct-main rule. Stage only intended policy files, commit them, and push without force. If a push is rejected, fetch and inspect the divergence; do not stash, reset, discard changes, or resolve a non-trivial conflict without user direction.
