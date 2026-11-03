@@ -8,8 +8,8 @@
 
 ## Knowledge base
 
-- Resolve knowledge-base paths from the physical directory containing the live, reviewed `agent-rules/AGENTS.md` on `main`. Never use a candidate worktree, a `git show` copy, the workspace-root symlink's directory, or the current working directory as the anchor. From the live `AGENTS.md` directory, use `../knowledge-base/`; if it is missing, report the condition and do not guess another location. Read it only when a task needs architecture or project facts, start with `../knowledge-base/README.md`, and open only the relevant documents.
-- Update the knowledge base only after behavior is merged to the owning repository's default branch. Label any documented unmerged behavior with its branch and commit, follow `../knowledge-base/MAINTENANCE.md` resolved from the same live `AGENTS.md` directory, and report separately when an update is local-only because the knowledge base is not version-controlled.
+- Resolve knowledge-base paths from the directory containing the workspace-root `AGENTS.md` symlink, taking the symlink path lexically without following it. Never use its resolved `agent-rules/AGENTS.md` target directory or the current working directory as the anchor. From the workspace-root symlink directory, use `knowledge-base/`; if it is missing, report the condition and do not guess another location. Read it only when a task needs architecture or project facts, start with `knowledge-base/README.md`, and open only the relevant documents.
+- Update the knowledge base only after behavior is merged to the owning repository's default branch. Label any documented unmerged behavior with its branch and commit, follow `knowledge-base/MAINTENANCE.md` resolved from the same workspace-root symlink directory, and report separately when an update is local-only because the knowledge base is not version-controlled.
 
 ## Delegation and resources
 
