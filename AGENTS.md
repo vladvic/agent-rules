@@ -22,6 +22,7 @@
 - Once the exact problem is clear, add a concise, actionable rule to `RULES.md` describing what to avoid or what not to do.
 - Generalize feedback into reusable guidance instead of recording task-specific details.
 - Preserve existing rules and consolidate overlapping guidance instead of adding duplicates or contradictions.
+- `AGENTS.md` and `RULES.md` in the workspace root are symlinks into `agent-rules/`, a clone of https://github.com/vladvic/agent-rules. Before reading them at the start of a session, run `git -C agent-rules pull --ff-only`. After editing either file, commit the change in `agent-rules/` and push it to `main`; if the push is rejected, pull with rebase, resolve, and push again. Never replace the symlinks with regular files.
 
 ## Subagent Delegation
 
